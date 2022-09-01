@@ -5,7 +5,7 @@ const axios = require("axios");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const cors = require("cors");
-app.use(cors);
+app.use(cors());
 dotenv.config();
 
 var db;
@@ -22,26 +22,31 @@ MongoClient.connect(
   }
 );
 
-let token = {};
-app.post(`http://127.0.0.1:3001/user/sign`, async (req, res) => {
+app.get(`/user/sign`, async (req, res) => {
+  const token = req.headers.authorization;
+  let userData = {};
+  console.log(token);
   await axios
-    .post("https://kapi.kakao.com/v2/user/me", {
+    .get("https://kapi.kakao.com/v2/user/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
-    .then((userId = res.data))
-    .then(console.log(userId))
-    .then();
-  const findUser = db.collection("bacharta").findOne({ kakaoPk: userId });
-  if (!findUser) return userId;
-  db.collection("bacharta").insertOne({ kakaoPk: userId }, () => {
-    console.log("저장완료");
+    .then((res) => (userData = res.data))
+    .catch((err) => console.log(err));
+  const kakaoPk = userData.id;
+  let userRow = await db.collection("bacharta").findOne({ kakaoPk: kakaoPk });
 
-    return res
-      .header("Authorization", token)
-      .status(200)
-      .json({ message: "Success" });
-  });
+  if (!userRow) {
+    userRow = db.collection("bacharta").insertOne({ kakaoPk: kakaoPk });
+  }
+  const serviceToken = jwt.sign(
+    {
+      userNickname: userData.properties.nickname,
+    },
+    process.env.SECRET_KEY
+  );
 
-  //const kakaoToken = 1;
-  //const token = jwt.sign({});
+  return res
+    .header("Authorization", serviceToken)
+    .status(200)
+    .json({ message: "Success" });
 });
