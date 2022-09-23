@@ -8,7 +8,10 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const logger = require("morgan");
 const xmlParser = require("express-xml-bodyparser");
+const bodyparser = require("body-parser");
 
+app.use(bodyparser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(logger("combined"));
 app.use(xmlParser());
@@ -35,7 +38,18 @@ const fullDay = `${date.getFullYear()}${
 
 const exchangeAPI = `https://unipass.customs.go.kr:38010/ext/rest/trifFxrtInfoQry/retrieveTrifFxrtInfo?crkyCn=${process.env.EXCHANGE_KEY}&qryYymmDd=${fullDay}&imexTp=2`;
 
-app.get("/", async (req, res) => {
+const outfitData = {};
+app.post("/select-outfit", (req, res) => {
+  // ** Todo -> DB에 저장하고 불러올지 고민해봐야함 요청했을 때 테스트도 해봐야함.
+  // DB에 있는 데이터를 꺼내서 프론트에서 일치하는지 확인해 봐야할 수 도 있음.
+  outfitData = req.data;
+});
+
+app.get("/getoutfit", (req, res) => {
+  return res.status(200).json({ message: "성공", data: outfitData });
+});
+
+app.get("/exchange", async (req, res) => {
   let exchageObject = {};
   const a = await axios.get(exchangeAPI, (err, res, body) => {
     const result = body;
@@ -49,6 +63,7 @@ app.get("/", async (req, res) => {
   const xmlToJson = convert.xml2js(a.data, { compact: true, spaces: 4 });
   res.status(200).json({ message: "성공", data: xmlToJson });
 });
+
 app.get(`/user/sign`, async (req, res) => {
   try {
     console.log(req.headers.authorization);
@@ -58,7 +73,7 @@ app.get(`/user/sign`, async (req, res) => {
       .get("https://kapi.kakao.com/v2/user/me", {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => (userData = res.data)); //전의 코드는 res.data를 userId에 담았음.
+      .then((res) => (userData = res.data));
 
     const kakaoPk = userData.id;
 
