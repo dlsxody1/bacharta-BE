@@ -1,3 +1,4 @@
+const locationData = require("./locationData.json");
 const express = require("express");
 const convert = require("xml-js");
 const app = express();
@@ -8,10 +9,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const logger = require("morgan");
 const xmlParser = require("express-xml-bodyparser");
-const bodyparser = require("body-parser");
 
-app.use(bodyparser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(logger("combined"));
 app.use(xmlParser());
@@ -37,12 +35,15 @@ const fullDay = `${date.getFullYear()}${
 }${date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()}`;
 
 const exchangeAPI = `https://unipass.customs.go.kr:38010/ext/rest/trifFxrtInfoQry/retrieveTrifFxrtInfo?crkyCn=${process.env.EXCHANGE_KEY}&qryYymmDd=${fullDay}&imexTp=2`;
+//const weatherAPI = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&units=metric&appid=${apiKey}`;
 
 const outfitData = {};
-app.post("/select-outfit", (req, res) => {
+app.get("/select-outfit", (req, res) => {
   // ** Todo -> DB에 저장하고 불러올지 고민해봐야함 요청했을 때 테스트도 해봐야함.
   // DB에 있는 데이터를 꺼내서 프론트에서 일치하는지 확인해 봐야할 수 도 있음.
+  console.log("이후경 통신성공");
   outfitData = req.data;
+  return res.status(200).json({ message: "이후경 화이팅", data: outfitData });
 });
 
 app.get("/getoutfit", (req, res) => {
@@ -50,18 +51,33 @@ app.get("/getoutfit", (req, res) => {
 });
 
 app.get("/exchange", async (req, res) => {
+  console.log("exchage 겟요청");
   let exchageObject = {};
-  const a = await axios.get(exchangeAPI, (err, res, body) => {
+  const getData = await axios.get(exchangeAPI, (err, res, body) => {
     const result = body;
-    console.log(123);
+
     const xmlToJsona = convert.xml2json(result, {
       compact: true,
       spaces: 4,
     });
     return (exchageObject = xmlToJson);
   });
-  const xmlToJson = convert.xml2js(a.data, { compact: true, spaces: 4 });
+  const xmlToJson = convert.xml2js(getData.data, { compact: true, spaces: 4 });
   res.status(200).json({ message: "성공", data: xmlToJson });
+});
+
+app.get("/location", async (req, res) => {
+  const result = {};
+  const getData = await Promise.all(
+    locationData.map(async ({ lat, lng }) => {
+      const request = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&units=metric&appid=${process.env.OPEN_WEATHER_KEY}`
+      );
+      return request.data;
+    })
+  );
+
+  res.status(200).json({ message: "test", data: getData });
 });
 
 app.get(`/user/sign`, async (req, res) => {
