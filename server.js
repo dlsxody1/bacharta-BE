@@ -35,7 +35,7 @@ const fullDay = `${date.getFullYear()}${
 }${date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()}`;
 
 const exchangeAPI = `https://unipass.customs.go.kr:38010/ext/rest/trifFxrtInfoQry/retrieveTrifFxrtInfo?crkyCn=${process.env.EXCHANGE_KEY}&qryYymmDd=${fullDay}&imexTp=2`;
-//const weatherAPI = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&units=metric&appid=${apiKey}`;
+const atmosphereAPI = `http://apis.data.go.kr/1480523/MetalMeasuringResultService/MetalService?numOfRows=1&pageNo=1&resultType=xml&stationcode=1&date=${fullDay}&timecode=RH02&itemcode=90303&serviceKey=${process.env.ATMOSPHERE_KEY}`;
 
 const outfitData = {};
 app.get("/select-outfit", (req, res) => {
@@ -56,7 +56,7 @@ app.get("/exchange", async (req, res) => {
   const getData = await axios.get(exchangeAPI, (err, res, body) => {
     const result = body;
 
-    const xmlToJsona = convert.xml2json(result, {
+    const xmlToJson = convert.xml2json(result, {
       compact: true,
       spaces: 4,
     });
@@ -65,9 +65,24 @@ app.get("/exchange", async (req, res) => {
   const xmlToJson = convert.xml2js(getData.data, { compact: true, spaces: 4 });
   res.status(200).json({ message: "성공", data: xmlToJson });
 });
+app.get("/atmosphere", async (req, res) => {
+  console.log("atmosphere");
+  let atmosphereObject = {};
+
+  const getData = await axios.get(atmosphereAPI, (err, res, body) => {
+    const result = body;
+    const xmlToJson = convert.xml2js(result, {
+      compact: true,
+      spaces: 4,
+    });
+    return (atmosphereObject = xmlToJson);
+  });
+
+  const xmlToJson = convert.xml2js(getData.data, { compact: true, spaces: 4 });
+  res.status(200).json({ message: "성공", data: xmlToJson });
+});
 
 app.get("/location", async (req, res) => {
-  const result = {};
   const getData = await Promise.all(
     locationData.map(async ({ lat, lng }) => {
       const request = await axios.get(
