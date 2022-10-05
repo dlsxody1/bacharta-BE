@@ -1,4 +1,5 @@
 const locationData = require("./locationData.json");
+const atmosphereNumber = require("./atmosphere.json");
 const express = require("express");
 const convert = require("xml-js");
 const app = express();
@@ -31,54 +32,62 @@ MongoClient.connect(
 
 const date = new Date();
 const fullDay = `${date.getFullYear()}${
-  date.getMonth() < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1
+  date.getMonth() > 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1
 }${date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()}`;
 
-const exchangeAPI = `https://unipass.customs.go.kr:38010/ext/rest/trifFxrtInfoQry/retrieveTrifFxrtInfo?crkyCn=${process.env.EXCHANGE_KEY}&qryYymmDd=${fullDay}&imexTp=2`;
+//const exchangeAPI = `https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=${process.env.EXCHANGE_KEY}&searchdate=20220104&data=AP01`;
+
+const exchangeAPI = `https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=${process.env.EXCHANGE_KEY}&searchdate=${fullDay}&data=AP01`;
 const atmosphereAPI = `http://apis.data.go.kr/1480523/MetalMeasuringResultService/MetalService?numOfRows=1&pageNo=1&resultType=xml&stationcode=1&date=${fullDay}&timecode=RH02&itemcode=90303&serviceKey=${process.env.ATMOSPHERE_KEY}`;
 
-const outfitData = {};
-app.get("/select-outfit", (req, res) => {
+app.post("/select-outfit", (req, res) => {
   // ** Todo -> DB에 저장하고 불러올지 고민해봐야함 요청했을 때 테스트도 해봐야함.
   // DB에 있는 데이터를 꺼내서 프론트에서 일치하는지 확인해 봐야할 수 도 있음.
-  console.log("이후경 통신성공");
-  outfitData = req.data;
-  return res.status(200).json({ message: "이후경 화이팅", data: outfitData });
+  console.log(req.body, "바디");
+  // db.collection("outfit").insertOne(req);
+
+  return res.status(200).json({ message: "이후경 화이팅", data: req });
 });
 
-app.get("/getoutfit", (req, res) => {
-  return res.status(200).json({ message: "성공", data: outfitData });
+app.get("/getoutfit/:userToken", (req, res) => {
+  let { userToken } = req.params;
+  let checkUser = db.collection("outfit").findOne({ userToken: userToken });
+  const userOutfit = {};
+  if (checkUser) {
+    userOutfit = checkUser;
+  } else {
+    userOutfit.message = "outfit data가 없습니다";
+  }
+
+  return res.status(200).json({ message: "성공", data: userOutfit });
 });
 
 app.get("/exchange", async (req, res) => {
   console.log("exchage 겟요청");
-  let exchageObject = {};
-  const getData = await axios.get(exchangeAPI, (err, res, body) => {
-    const result = body;
-
-    const xmlToJson = convert.xml2json(result, {
-      compact: true,
-      spaces: 4,
-    });
-    return (exchageObject = xmlToJson);
-  });
-  const xmlToJson = convert.xml2js(getData.data, { compact: true, spaces: 4 });
-  res.status(200).json({ message: "성공", data: xmlToJson });
+  let exchageData = {};
+  const getData = await axios.get(exchangeAPI);
+  console.log(getData);
+  res.status(200).json({ message: "성공", data: getData.data });
 });
-app.get("/atmosphere", async (req, res) => {
-  console.log("atmosphere");
-  let atmosphereObject = {};
 
-  const getData = await axios.get(atmosphereAPI, (err, res, body) => {
-    const result = body;
-    const xmlToJson = convert.xml2js(result, {
-      compact: true,
-      spaces: 4,
-    });
-    return (atmosphereObject = xmlToJson);
-  });
+app.get("/atmosphere/:location", async (req, res) => {
+  let atmosphereObject = {};
+  let { location } = req.params;
+
+  const getData = await axios.get(
+    `http://apis.data.go.kr/1480523/MetalMeasuringResultService/MetalService?numOfRows=1&pageNo=1&resultType=xml&stationcode=${location}&date=${fullDay}&timecode=RH02&itemcode=90303&serviceKey=${process.env.ATMOSPHERE_KEY}`,
+    (err, res, body) => {
+      const result = body;
+      const xmlToJson = convert.xml2js(result, {
+        compact: true,
+        spaces: 4,
+      });
+      return (atmosphereObject = xmlToJson);
+    }
+  );
 
   const xmlToJson = convert.xml2js(getData.data, { compact: true, spaces: 4 });
+  console.log(xmlToJson);
   res.status(200).json({ message: "성공", data: xmlToJson });
 });
 
@@ -88,16 +97,16 @@ app.get("/location", async (req, res) => {
       const request = await axios.get(
         `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&units=metric&appid=${process.env.OPEN_WEATHER_KEY}`
       );
+
       return request.data;
     })
   );
 
-  res.status(200).json({ message: "test", data: getData });
+  res.status(200).json({ message: "연결성공", data: getData });
 });
 
 app.get(`/user/sign`, async (req, res) => {
   try {
-    console.log(req.headers.authorization);
     const token = req.headers.authorization;
     let userData = {};
     await axios
