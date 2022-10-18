@@ -119,7 +119,7 @@ COVID_KEY = ...
 - 코로나 api : https://www.data.go.kr/data/15099842/openapi.do
 - 범죄 api : https://www.data.go.kr/data/3072018/openapi.do
 - 대기 api : https://www.data.go.kr/data/15073861/openapi.do
-- 낳씨 api : https://openweathermap.org/api/one-call-3
+- 날씨 api : https://openweathermap.org/api/one-call-3
 
 ```
 
