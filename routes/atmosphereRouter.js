@@ -8,7 +8,12 @@ const xmlParser = require("express-xml-bodyparser");
 
 app.use(xmlParser());
 
-router.get("/atmosphere/:location", async (req, res) => {
+const date = new Date();
+const fullDay = `${date.getFullYear()}${
+  date.getMonth() > 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1
+}${date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()}`;
+
+router.get("/:location", async (req, res) => {
   let atmosphereObject = {};
   let { location } = req.params;
 
@@ -20,13 +25,20 @@ router.get("/atmosphere/:location", async (req, res) => {
         compact: true,
         spaces: 4,
       });
-      return (atmosphereObject = xmlToJson);
+      return xmlToJson;
     }
   );
 
   const xmlToJson = convert.xml2js(getData.data, { compact: true, spaces: 4 });
-  console.log(xmlToJson.header);
-  res.status(200).json({ message: "성공", data: xmlToJson });
+
+  let stationcode = xmlToJson.response.body.items.item["stationcode"]._text;
+  let atmosphereValue = xmlToJson.response.body.items.item["value"]._text;
+
+  atmosphereObject = {
+    stationcode: stationcode,
+    atmosphereValue: atmosphereValue,
+  };
+  res.status(200).json({ message: "성공", data: atmosphereObject });
 });
 
 module.exports = router;

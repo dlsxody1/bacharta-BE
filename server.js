@@ -14,7 +14,7 @@ app.use(logger("combined"));
 let db;
 app.use(cors());
 app.use("/user/sign", loginRouter);
-app.use("/atmosphere/:location", atmosphereRouter);
+app.use("/atmosphere", atmosphereRouter);
 app.use("/covid", covidRouter);
 app.use("/crime", crimeRouter);
 app.use("/exchange", exchangeRouter);
