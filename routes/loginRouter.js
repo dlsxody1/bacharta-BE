@@ -41,7 +41,6 @@ router.get("", async (req, res) => {
       .status(200)
       .json({ message: "Login Success" });
   } catch (err) {
-    console.log(err.response.status);
     res.status(400).json({ message: "연결에러입니다." });
   }
 });
