@@ -23,7 +23,9 @@ Bacharta Project를 위한 백엔드 서버
 
 ## .env key value
 
+-  배포작업이 어려움이 있어서 배포하기 전에 사용방법을 설명 드리겠습니다
 - .env 파일을 올리지 않을 것이기 때문에 키값과 value에 어떤 것이 들어가야하는지 적어놓겠습니다.
+- MONGODB_KEY 는 mongodb 회원가입후에 bacharta라는 browser collection을 만들어야합니다. 그리고 create database를누르고 bacharta라는 DB를 만들어주시면 되겠습니다. 
 - EXCHANGE_KEY,ATMOSPHERE_KEY,COVID_KEY 는 https://www.data.go.kr/index.do 에서 회원가입 하신 후에 맨 아래에 있는 링크에서 
 사용허가를 받으시면 키가 나옵니다.
 - OPEN_WEATHER_KEY 는 https://openweathermap.org/api/one-call-3에서 회원가입 후에 api키 발급 받으시고 이용하시면 됩니다!
@@ -119,7 +121,7 @@ COVID_KEY = ...
 - 코로나 api : https://www.data.go.kr/data/15099842/openapi.do
 - 범죄 api : https://www.data.go.kr/data/3072018/openapi.do
 - 대기 api : https://www.data.go.kr/data/15073861/openapi.do
-- 낳씨 api : https://openweathermap.org/api/one-call-3
+- 날씨 api : https://openweathermap.org/api/one-call-3
 
 ```
 
