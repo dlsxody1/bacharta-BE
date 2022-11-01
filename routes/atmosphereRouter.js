@@ -31,8 +31,8 @@ router.get("/:location", async (req, res) => {
 
   const xmlToJson = convert.xml2js(getData.data, { compact: true, spaces: 4 });
 
-  let stationcode = xmlToJson.response.body.items.item["stationcode"]._text;
-  let atmosphereValue = xmlToJson.response.body.items.item["value"]._text;
+  let stationcode = xmlToJson.response?.body.items.item["stationcode"]._text;
+  let atmosphereValue = xmlToJson.response?.body.items.item["value"]._text;
 
   atmosphereObject = {
     stationcode: stationcode,

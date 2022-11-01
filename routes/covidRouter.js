@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
 
   return res.status(200).json({
     message: "covid data 통신 성공",
-    data: getData.data.response.result,
+    data: getData.data.response?.result,
   });
 });
 

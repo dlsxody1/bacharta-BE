@@ -7,6 +7,7 @@ const covidRouter = require("./routes/covidRouter");
 const crimeRouter = require("./routes/crimeRouter");
 const exchangeRouter = require("./routes/exchangeRouter");
 const locationRouter = require("./routes/locationRouter");
+const chattingRouter = require("./routes/chattingRouter");
 const cors = require("cors");
 const loginRouter = require("./routes/loginRouter");
 app.use(logger("combined"));
@@ -19,11 +20,12 @@ app.use("/covid", covidRouter);
 app.use("/crime", crimeRouter);
 app.use("/exchange", exchangeRouter);
 app.use("/location", locationRouter);
+app.use("/chatting", chattingRouter);
 
 MongoClient.connect(
   `mongodb+srv://${process.env.MONGODB_KEY}@cluster0.hl7ifoa.mongodb.net/?retryWrites=true&w=majority`,
   (err, client) => {
-    if (err) return console.log(연결오류);
+    if (err) return console.log(err);
     app.listen(3001, () => {
       console.log("서버");
     });

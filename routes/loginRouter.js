@@ -9,7 +9,7 @@ const { db } = require("../server");
 app.use(cors());
 dotenv.config();
 
-router.get("", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const token = req.headers.authorization;
     let userData = {};
@@ -29,11 +29,17 @@ router.get("", async (req, res) => {
         .insertOne({ kakaoPk: kakaoPk })
         .then(() => console.log("저장완료했습니다"));
     }
+
     const serviceToken = jwt.sign(
       {
         userNickname: userData.properties.nickname,
+        userProfile: userData.properties.profile_image,
       },
-      process.env.SECRET_KEY
+      process.env.SECRET_KEY,
+      {
+        expiresIn: "2h",
+        algorithm: "HS256",
+      }
     );
 
     return res
