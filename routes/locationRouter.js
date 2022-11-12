@@ -18,7 +18,6 @@ router.get("", async (req, res) => {
     })
   );
 
-  console.log("d");
   res.status(200).json({ message: "연결성공", data: getData });
 });
 
