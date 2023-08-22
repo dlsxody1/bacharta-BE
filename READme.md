@@ -3,6 +3,12 @@
 <br/>
 <br/>
 
+## 흐름 구성
+
+![bacharta](https://github.com/dlsxody1/bacharta-BE/assets/62875596/0a9408f7-6baa-41b4-b495-1936b67b4a5f)
+
+
+
 ## 🙉서비스 개요
 
 Bacharta Project를 위한 백엔드 서버
