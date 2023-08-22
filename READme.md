@@ -5,7 +5,8 @@
 
 ## 흐름 구성
 
-![bacharta](https://github.com/dlsxody1/bacharta-BE/assets/62875596/0a9408f7-6baa-41b4-b495-1936b67b4a5f)
+![바차타](https://github.com/dlsxody1/bacharta-BE/assets/62875596/e9d1eef4-f061-4309-a57d-d91edcc9443d)
+
 
 
 
